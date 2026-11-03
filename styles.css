@@ -1,0 +1,137 @@
+/* ===== Colores y fuente que usamos en todo el sistema ===== */
+:root {
+  --morado-principal: #652780;
+  --morado-oscuro: #4B1D61;
+  --morado-suave: #F3ECF8;
+  --turquesa-principal: #3E8B80;
+  --turquesa-suave: #E8F5F3;
+  --rosita-principal: #D86B9D;
+  --rosita-pastel: #FCEBF3;
+  --texto-oscuro: #2D2A3F;
+  --texto-suave: #625B75;
+  --fondo-general: #FAF8FC;
+  --superficie-blanca: #FFFFFF;
+  --borde-suave: #EAE3F0;
+  --fuente-principal: 'Fredoka', 'Segoe UI', sans-serif;
+}
+
+/* Para que el padding y el borde no agranden las cajas */
+* { box-sizing: border-box; }
+
+/* ===== Estilos generales de la página ===== */
+body {
+  margin: 0;
+  font-family: var(--fuente-principal);
+  background-color: var(--fondo-general);
+  color: var(--texto-oscuro);
+  font-size: 17px;
+}
+
+/* Títulos en color morado */
+h1, h2 { color: var(--morado-principal); margin: 0; }
+/* Los links sin subrayado y del mismo color del texto */
+a { color: inherit; text-decoration: none; }
+
+/* Contenedor principal de toda la página */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ===== Encabezado de arriba (logo y menú) ===== */
+.encabezado-superior {
+  background: linear-gradient(135deg, var(--morado-oscuro) 0%, var(--morado-principal) 100%);
+  color: #ffffff;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Logo y nombre de la veterinaria */
+.marca { display: flex; align-items: center; gap: 14px; }
+/* Círculo blanco donde va el logo */
+.marca-icono {
+  width: 52px; height: 52px; border-radius: 50%; background: #ffffff; padding: 4px;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.marca-icono img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+.marca-texto { font-size: 22px; font-weight: 800; line-height: 1.1; }
+
+/* Menú de arriba */
+.menu-superior { display: flex; gap: 10px; }
+.nav-item-top {
+  display: flex; align-items: center; gap: 8px; padding: 8px 18px;
+  border-radius: 14px; background: var(--rosita-pastel); color: var(--morado-oscuro); font-weight: 700;
+}
+
+/* ===== Contenido de cada página ===== */
+/* Lo centramos y le ponemos un ancho máximo */
+.contenido { padding: 32px 40px 60px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+/* Título de cada página con su botón a un lado */
+.encabezado-pagina { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.subtitulo { color: var(--texto-suave); font-size: 16px; margin-top: 4px; }
+
+/* Los emojis se ven más grandes */
+.emoji { font-size: 1.4em; vertical-align: -2px; }
+
+/* ===== Botones ===== */
+.boton {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 24px; border-radius: 14px; font-size: 16px; font-weight: 700; border: none; cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+/* Botón blanco con borde */
+.boton-secundario { background: var(--superficie-blanca); color: var(--texto-oscuro); border: 2px solid var(--borde-suave); }
+/* Botón rosa (el principal) y su color al pasar el mouse */
+.boton-rosa { background: var(--rosita-principal); color: #ffffff; }
+.boton-rosa:hover { background: #c25788; }
+/* Botón chiquito verde para el link "Ver Ficha" */
+.boton-texto { color: var(--turquesa-principal); font-weight: 700; background: var(--turquesa-suave); padding: 6px 14px; border-radius: 10px; }
+
+/* ===== Buscador y campos de texto ===== */
+.buscador-form { margin-bottom: 24px; display: flex; gap: 12px; }
+.input-control {
+  width: 100%; padding: 14px 18px; border-radius: 14px; border: 2px solid var(--borde-suave);
+  font-size: 16px; font-family: inherit; outline: none; background: var(--superficie-blanca);
+}
+/* Cuando se hace clic en el campo, el borde se pone morado */
+.input-control:focus { border-color: var(--morado-principal); }
+
+/* ===== Tabla de pacientes ===== */
+.tabla-envoltura {
+  background: var(--superficie-blanca); border-radius: 20px; border: 2px solid var(--borde-suave);
+  overflow: hidden; box-shadow: 0 8px 24px rgba(101, 39, 128, 0.08);
+}
+table.tabla { width: 100%; border-collapse: collapse; }
+/* Encabezados de la tabla */
+.tabla th {
+  text-align: left; font-size: 15px; font-weight: 700; color: var(--morado-principal);
+  background: var(--morado-suave); padding: 16px 22px; border-bottom: 2px solid var(--borde-suave);
+}
+/* Celdas de la tabla */
+.tabla td { padding: 18px 22px; border-bottom: 1px solid var(--borde-suave); font-size: 16px; }
+.nombre-mascota { font-weight: 700; font-size: 18px; color: var(--morado-oscuro); }
+
+/* ===== Tarjetas del formulario y de la ficha ===== */
+.tarjeta-formulario, .tarjeta-detalle {
+  background: var(--superficie-blanca); border-radius: 20px; padding: 32px;
+  border: 2px solid var(--borde-suave); box-shadow: 0 8px 24px rgba(101, 39, 128, 0.08);
+}
+/* El formulario se acomoda en 2 columnas */
+.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+/* Los campos con esta clase ocupan las 2 columnas */
+.full-width { grid-column: span 2; }
+.form-grupo label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--morado-oscuro); }
+
+/* ===== Ficha de la mascota (detalle) ===== */
+/* Los datos también van en 2 columnas */
+.detalle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+/* Título chiquito de cada dato */
+.detalle-item .label { display: block; font-size: 14px; color: var(--texto-suave); font-weight: 700; }
+/* El dato en sí, más grande */
+.detalle-item .valor { font-size: 20px; font-weight: 700; color: var(--morado-oscuro); }
+/* Cajita para los textos largos (corte y observaciones) */
+.valor-box {
+  background: var(--fondo-general); padding: 18px; border-radius: 14px;
+  border: 2px solid var(--borde-suave); margin-top: 8px; font-size: 16px;
+}
