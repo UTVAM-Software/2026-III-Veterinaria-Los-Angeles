@@ -2,6 +2,22 @@
 require_once "includes/auth.php";
 require_once "config/conexion.php";
 
+// Si viene un id, estamos EDITANDO una hoja que ya existe
+$id = $_GET['id'] ?? ($_POST['id'] ?? '');
+$editando = ctype_digit((string)$id);
+exigir($editando ? 'estetica.editar' : 'estetica.crear');
+$actual = null;
+if ($editando) {
+    $s = $pdo->prepare("SELECT * FROM hojas_estetica WHERE id = ?");
+    $s->execute([$id]);
+    $actual = $s->fetch();
+    if (!$actual) {
+        flash('error', "No encontramos esa hoja. Puede que ya se haya eliminado.");
+        header("Location: estetica.php");
+        exit();
+    }
+}
+
 $servicios_validos = ['Baño', 'Deslanado', 'Corte', 'Limpieza de oídos', 'Corte de uñas'];
 $pagos_validos = ['Efectivo', 'Tarjeta', 'Transferencia', 'Otro'];
 
@@ -16,8 +32,16 @@ $v = [
     'detalles_corte' => '', 'observaciones' => '', 'costo_total' => '', 'a_cuenta' => '',
     'forma_pago' => 'Efectivo', 'servicios' => []
 ];
+if ($actual) {
+    foreach ($v as $campo => $_) {
+        if ($campo === 'servicios') { $v['servicios'] = array_values(array_intersect($servicios_validos, array_map('trim', explode(',', (string)$actual['servicios'])))); }
+        else { $v[$campo] = (string)($actual[$campo] ?? ''); }
+    }
+    $v['costo_total'] = rtrim(rtrim($v['costo_total'], '0'), '.');
+    $v['a_cuenta'] = rtrim(rtrim($v['a_cuenta'], '0'), '.');
+}
 // Si venimos desde la ficha del paciente, ya viene elegido
-if (isset($_GET['paciente_id']) && ctype_digit($_GET['paciente_id'])) { $v['paciente_id'] = $_GET['paciente_id']; }
+if (!$editando && isset($_GET['paciente_id']) && ctype_digit($_GET['paciente_id'])) { $v['paciente_id'] = $_GET['paciente_id']; }
 $errores = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -64,6 +88,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$errores) {
         try {
+            if ($editando) {
+                // El folio NO cambia al editar
+                $stmt = $pdo->prepare("UPDATE hojas_estetica SET paciente_id=?, fecha=?, hora_llegada=?, hora_salida=?, servicios=?, detalles_corte=?, observaciones=?, costo_total=?, a_cuenta=?, forma_pago=? WHERE id=?");
+                $stmt->execute([$paciente['id'], $v['fecha'], $v['hora_llegada'], $v['hora_salida'], implode(', ', $v['servicios']),
+                    $v['detalles_corte'], $v['observaciones'], $costo, $cuenta, $v['forma_pago'], $id]);
+                flash('ok', "Se actualizó la hoja #" . $actual['folio'] . " de " . $paciente['nombre'] . ".");
+                header("Location: estetica_detalle.php?id=" . (int)$id);
+                exit();
+            }
             $folio = siguiente_folio($pdo);
             $stmt = $pdo->prepare("INSERT INTO hojas_estetica (folio, paciente_id, fecha, hora_llegada, hora_salida, servicios, detalles_corte, observaciones, costo_total, a_cuenta, forma_pago)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -79,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $pacientes_lista = $pdo->query("SELECT id, nombre, dueno_nombre FROM pacientes ORDER BY nombre ASC")->fetchAll();
-$folio_mostrar = siguiente_folio($pdo);
+$folio_mostrar = $editando ? $actual['folio'] : siguiente_folio($pdo);
 require_once "includes/header.php";
 ?>
 
@@ -88,10 +121,10 @@ require_once "includes/header.php";
 
 <div class="encabezado-pagina">
     <div>
-        <h1><span class="emoji">📝</span> Hoja de estética</h1>
+        <h1><span class="emoji">📝</span> <?= $editando ? 'Editar hoja de estética' : 'Hoja de estética' ?></h1>
         <p class="subtitulo">Elige a la mascota y llena lo que se le va a hacer hoy. Los campos con <strong>*</strong> son obligatorios.</p>
     </div>
-    <a href="estetica.php" class="boton boton-secundario"><span class="emoji">⬅️</span> Volver a la lista</a>
+    <a href="<?= $editando ? 'estetica_detalle.php?id=' . (int)$id : 'estetica.php' ?>" class="boton boton-secundario"><span class="emoji">⬅️</span> Volver</a>
 </div>
 
 <?php if ($errores): ?>
@@ -107,6 +140,7 @@ require_once "includes/header.php";
 <?php else: ?>
     <form method="POST" class="form-secciones" data-evitar-doble="1">
         <?= csrf_field() ?>
+        <?php if ($editando): ?><input type="hidden" name="id" value="<?= (int)$id ?>"><?php endif; ?>
 
         <fieldset class="seccion">
             <legend>1️⃣ ¿Para quién es?</legend>
@@ -189,7 +223,7 @@ require_once "includes/header.php";
             </div>
         </fieldset>
 
-        <button type="submit" class="boton boton-rosa boton-grande"><span class="emoji">💾</span> Guardar hoja de estética</button>
+        <button type="submit" class="boton boton-rosa boton-grande"><span class="emoji">💾</span> <?= $editando ? 'Guardar cambios' : 'Guardar hoja de estética' ?></button>
     </form>
 <?php endif; ?>
 </div>

@@ -1,6 +1,7 @@
 <?php
 require_once "includes/auth.php";
 require_once "config/conexion.php";
+exigir('pacientes.ver');
 
 $id = $_GET['id'] ?? ($_POST['id'] ?? '');
 if (!ctype_digit((string)$id)) {
@@ -27,7 +28,9 @@ $citas = $citas->fetchAll();
 
 // Eliminar paciente: solo si no tiene historial (así nunca se pierde un expediente por error)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'eliminar') {
-    if (!csrf_ok()) {
+    if (!puede('pacientes.eliminar')) {
+        flash('error', "No tienes permiso para eliminar pacientes.");
+    } elseif (!csrf_ok()) {
         flash('error', "La pantalla estuvo abierta mucho tiempo. Intenta otra vez.");
     } elseif (count($hojas) > 0 || count($citas) > 0) {
         flash('error', $p['nombre'] . " no se puede eliminar porque tiene historial (" . count($hojas) . " hoja(s) de estética y " . count($citas) . " cita(s) médica(s)). Esto protege los expedientes.");
@@ -56,7 +59,7 @@ require_once "includes/header.php";
     </div>
     <div class="acciones">
         <a href="pacientes.php" class="boton boton-secundario"><span class="emoji">⬅️</span> Volver</a>
-        <a href="paciente_nuevo.php?id=<?= (int)$p['id'] ?>" class="boton boton-secundario"><span class="emoji">✏️</span> Corregir datos</a>
+        <?php if (puede('pacientes.editar')): ?><a href="paciente_nuevo.php?id=<?= (int)$p['id'] ?>" class="boton boton-secundario"><span class="emoji">✏️</span> Corregir datos</a><?php endif; ?>
     </div>
 </div>
 
@@ -78,7 +81,7 @@ require_once "includes/header.php";
         </div>
         <div class="detalle-item">
             <span class="label">👤 Dueño y contacto</span>
-            <span class="valor chico"><?= e($p['dueno_nombre']) ?> (📞 <?= e($p['dueno_telefono']) ?>)</span>
+            <span class="valor chico"><?= e($p['dueno_nombre']) ?> (📞 <?= telefono_mx($p['dueno_telefono']) ?>)</span>
         </div>
         <div class="detalle-item full-width">
             <span class="label">🏠 Domicilio</span>
@@ -87,8 +90,8 @@ require_once "includes/header.php";
         <div class="detalle-item full-width">
             <span class="label">➕ Nuevo registro para <?= e($p['nombre']) ?></span>
             <div class="acciones" style="margin-top:8px;">
-                <a href="estetica_nueva.php?paciente_id=<?= (int)$p['id'] ?>" class="boton boton-rosa"><span class="emoji">✂️</span> Hoja de estética</a>
-                <a href="citas.php?paciente_id=<?= (int)$p['id'] ?>#nueva-cita" class="boton boton-rosa"><span class="emoji">🩺</span> Cita médica</a>
+                <?php if (puede('estetica.crear')): ?><a href="estetica_nueva.php?paciente_id=<?= (int)$p['id'] ?>" class="boton boton-rosa"><span class="emoji">✂️</span> Hoja de estética</a><?php endif; ?>
+                <?php if (puede('citas.crear')): ?><a href="citas.php?paciente_id=<?= (int)$p['id'] ?>#nueva-cita" class="boton boton-rosa"><span class="emoji">🩺</span> Cita médica</a><?php endif; ?>
             </div>
         </div>
     </div>
@@ -118,6 +121,7 @@ require_once "includes/header.php";
 </div>
 
 <!-- Eliminar: solo si no tiene historial -->
+<?php if (puede('pacientes.eliminar')): ?>
 <div style="margin-top:28px;">
     <form method="POST" data-confirmar="¿Seguro que quieres eliminar a <?= e($p['nombre']) ?> de la lista de pacientes? Esto no se puede deshacer.">
         <?= csrf_field() ?>
@@ -127,5 +131,6 @@ require_once "includes/header.php";
         <small class="ayuda">Solo se puede eliminar si no tiene hojas de estética ni citas médicas.</small>
     </form>
 </div>
+<?php endif; ?>
 
 <?php require_once "includes/footer.php"; ?>

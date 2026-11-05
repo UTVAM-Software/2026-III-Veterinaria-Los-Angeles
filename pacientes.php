@@ -1,18 +1,24 @@
 <?php
 require_once "includes/auth.php";
 require_once "config/conexion.php";
+exigir('pacientes.ver');
 
 $q = trim($_GET['q'] ?? '');
 $sql = "SELECT p.*,
           (SELECT COUNT(*) FROM hojas_estetica h WHERE h.paciente_id = p.id) AS n_hojas,
           (SELECT COUNT(*) FROM citas_medicas c WHERE c.paciente_id = p.id) AS n_citas
         FROM pacientes p ";
+$where = '';
+$params = [];
 if ($q !== '') {
-    $stmt = $pdo->prepare($sql . "WHERE p.nombre LIKE ? OR p.dueno_nombre LIKE ? OR p.dueno_telefono LIKE ? OR p.raza LIKE ? ORDER BY p.nombre ASC");
-    $stmt->execute(["%$q%", "%$q%", "%$q%", "%$q%"]);
-} else {
-    $stmt = $pdo->query($sql . "ORDER BY p.nombre ASC");
+    $where = "WHERE p.nombre LIKE ? OR p.dueno_nombre LIKE ? OR p.dueno_telefono LIKE ? OR p.raza LIKE ? ";
+    $params = ["%$q%", "%$q%", "%$q%", "%$q%"];
 }
+$total = $pdo->prepare("SELECT COUNT(*) FROM pacientes p " . $where);
+$total->execute($params);
+list($pagina, $paginas, $desde, $por_pagina) = paginar((int)$total->fetchColumn());
+$stmt = $pdo->prepare($sql . $where . "ORDER BY p.nombre ASC LIMIT $por_pagina OFFSET $desde");
+$stmt->execute($params);
 $pacientes = $stmt->fetchAll();
 
 require_once "includes/header.php";
@@ -23,7 +29,9 @@ require_once "includes/header.php";
         <h1><span class="emoji">🐕</span> Pacientes</h1>
         <p class="subtitulo">Aquí se registra cada mascota <strong>una sola vez</strong>. Después se le puede hacer una hoja de estética, una cita médica, o las dos.</p>
     </div>
+    <?php if (puede('pacientes.crear')): ?>
     <a href="paciente_nuevo.php" class="boton boton-rosa boton-grande-auto"><span class="emoji">➕</span> Registrar paciente nuevo</a>
+    <?php endif; ?>
 </div>
 
 <form method="GET" class="buscador-form" role="search">
@@ -42,13 +50,14 @@ require_once "includes/header.php";
             <?php foreach ($pacientes as $p): ?>
             <tr>
                 <td class="nombre-mascota"><span class="emoji">🐾</span> <?= e($p['nombre']) ?><br><small class="suave normal"><?= e($p['raza'] ?: 'Sin raza') ?></small></td>
-                <td>👤 <?= e($p['dueno_nombre']) ?><br><small class="suave">📞 <?= e($p['dueno_telefono']) ?></small></td>
+                <td>👤 <?= e($p['dueno_nombre']) ?><br><small class="suave">📞 <?= telefono_mx($p['dueno_telefono']) ?></small></td>
                 <td><small>✂️ <?= (int)$p['n_hojas'] ?> de estética<br>🩺 <?= (int)$p['n_citas'] ?> cita(s) médica(s)</small></td>
                 <td>
                     <div class="acciones">
                         <a href="paciente_detalle.php?id=<?= (int)$p['id'] ?>" class="boton-texto">👁️ Ver ficha</a>
-                        <a href="estetica_nueva.php?paciente_id=<?= (int)$p['id'] ?>" class="boton-texto">✂️ Estética</a>
-                        <a href="citas.php?paciente_id=<?= (int)$p['id'] ?>#nueva-cita" class="boton-texto">🩺 Cita</a>
+                        <?php if (puede('pacientes.editar')): ?><a href="paciente_nuevo.php?id=<?= (int)$p['id'] ?>" class="boton-texto">✏️ Editar</a><?php endif; ?>
+                        <?php if (puede('estetica.crear')): ?><a href="estetica_nueva.php?paciente_id=<?= (int)$p['id'] ?>" class="boton-texto">✂️ Estética</a><?php endif; ?>
+                        <?php if (puede('citas.crear')): ?><a href="citas.php?paciente_id=<?= (int)$p['id'] ?>#nueva-cita" class="boton-texto">🩺 Cita</a><?php endif; ?>
                     </div>
                 </td>
             </tr>
@@ -65,5 +74,7 @@ require_once "includes/header.php";
         </tbody>
     </table>
 </div>
+
+<?php mostrar_paginacion($pagina, $paginas); ?>
 
 <?php require_once "includes/footer.php"; ?>

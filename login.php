@@ -4,8 +4,8 @@ require_once "config/conexion.php";
 require_once "includes/validar.php";
 
 // Si ya había iniciado sesión, lo mandamos directo al sistema
-if (isset($_SESSION['rol'])) {
-    header("Location: pacientes.php");
+if (isset($_SESSION['usuario_id'])) {
+    header("Location: index.php");
     exit();
 }
 
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($usuario === '' || $password === '') {
         $error = "Escribe tu usuario y tu contraseña para entrar.";
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario = ?");
+        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario = ? AND activo = 1");
         $stmt->execute([$usuario]);
         $user = $stmt->fetch();
 
@@ -27,8 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             session_regenerate_id(true); // sesión nueva por seguridad
             $_SESSION['usuario_id'] = $user['id'];
             $_SESSION['usuario_nombre'] = $user['nombre'];
-            $_SESSION['rol'] = $user['rol'];
-            header("Location: pacientes.php");
+            header("Location: index.php");
             exit();
         } else {
             // Mismo mensaje para usuario o contraseña mal: no damos pistas a extraños

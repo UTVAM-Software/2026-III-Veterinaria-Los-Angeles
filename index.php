@@ -1,4 +1,5 @@
 <?php
-// Página principal: manda a la lista de pacientes (si no hay sesión, ahí mismo lo manda al login)
-header("Location: pacientes.php");
+// Página principal: manda a la primera pantalla a la que el usuario tiene permiso (si no hay sesión, lo manda al login)
+require_once "includes/auth.php";
+header("Location: " . pagina_inicio());
 exit();
