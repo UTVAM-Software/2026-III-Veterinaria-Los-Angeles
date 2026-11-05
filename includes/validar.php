@@ -70,3 +70,49 @@ function procesar_foto(&$errores) {
     }
     return ['mascota_' . bin2hex(random_bytes(6)) . '.' . $tipos[$info['mime']], $_FILES['foto']['tmp_name']];
 }
+
+// ===== Cálculos y formato (lógica de negocio) =====
+
+// Teléfono de 10 números con formato legible: 7791234567 -> 779 123 4567
+function telefono_mx($tel) {
+    $t = preg_replace('/\D/', '', (string)$tel);
+    return strlen($t) === 10 ? substr($t, 0, 3) . ' ' . substr($t, 3, 3) . ' ' . substr($t, 6) : e($tel);
+}
+
+// Dinero con signo y dos decimales: 350 -> $350.00
+function dinero($monto) {
+    return '$' . number_format((float)$monto, 2);
+}
+
+// Lo que todavía debe el cliente (nunca sale negativo)
+function saldo_pendiente($total, $a_cuenta) {
+    return max(0, (float)$total - (float)$a_cuenta);
+}
+
+// ===== Paginación (para que las listas largas no se hagan eternas) =====
+
+// Devuelve [pagina_actual, total_de_paginas, desde_cual_registro, cuantos_por_pagina]
+function paginar($total_registros, $por_pagina = 10) {
+    $paginas = max(1, (int)ceil($total_registros / $por_pagina));
+    $p = $_GET['pagina'] ?? '1';
+    $pagina = (ctype_digit((string)$p) && (int)$p > 0) ? (int)$p : 1;
+    $pagina = min($pagina, $paginas);
+    return [$pagina, $paginas, ($pagina - 1) * $por_pagina, $por_pagina];
+}
+
+// Dibuja los botones "Anterior / 1 2 3 / Siguiente" conservando la búsqueda que ya hizo
+function mostrar_paginacion($pagina, $paginas) {
+    if ($paginas <= 1) return;
+    $enlace = function ($n) {
+        return e(basename($_SERVER['PHP_SELF']) . '?' . http_build_query(array_merge($_GET, ['pagina' => $n])));
+    };
+    echo '<nav class="paginacion" aria-label="Páginas">';
+    if ($pagina > 1) echo '<a href="' . $enlace($pagina - 1) . '" class="boton boton-secundario">⬅️ Anterior</a>';
+    for ($i = 1; $i <= $paginas; $i++) {
+        if ($i === $pagina) echo '<span class="pagina-actual">' . $i . '</span>';
+        else echo '<a href="' . $enlace($i) . '" class="boton boton-secundario">' . $i . '</a>';
+    }
+    if ($pagina < $paginas) echo '<a href="' . $enlace($pagina + 1) . '" class="boton boton-secundario">Siguiente ➡️</a>';
+    echo '</nav>';
+}
+

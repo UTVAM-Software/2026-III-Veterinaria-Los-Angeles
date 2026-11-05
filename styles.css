@@ -221,3 +221,18 @@ p.ayuda { font-size: 16px; margin: 0 0 12px; }
   .buscador-form { flex-wrap: wrap; }
   .usuario-caja { text-align: left; }
 }
+
+
+/* ===== Entregable 3: paginación, usuarios, roles y permisos ===== */
+.menu-superior { flex-wrap: wrap; }
+.paginacion { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 24px 0; }
+.pagina-actual { background: var(--morado-principal); color: #fff; font-weight: 700; padding: 10px 16px; border-radius: 12px; }
+.etiqueta-gris { background: #eee9f2; color: var(--texto-suave); }
+.matriz-permisos { width: 100%; border-collapse: collapse; background: var(--superficie-blanca); }
+.matriz-permisos th, .matriz-permisos td { padding: 10px 14px; border-bottom: 1px solid var(--borde-suave); text-align: center; }
+.matriz-permisos th:first-child, .matriz-permisos td:first-child { text-align: left; }
+.matriz-permisos tr.fila-modulo td { background: var(--morado-suave); color: var(--morado-oscuro); font-weight: 700; text-align: left; text-transform: capitalize; }
+.matriz-permisos input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--morado-principal); cursor: pointer; }
+.matriz-permisos input[type=checkbox]:disabled { cursor: not-allowed; opacity: .6; }
+.matriz-permisos small { color: var(--texto-suave); font-weight: 400; }
+.boton-pequeno { padding: 6px 12px; font-size: 14px; }
