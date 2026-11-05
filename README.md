@@ -11,8 +11,9 @@ Los módulos son independientes entre sí; solo comparten al paciente.
 ## Tecnologías
 * **Backend:** PHP (PDO). **Base de datos:** MySQL. **Frontend:** HTML5, CSS3 y JavaScript.
 
-## Cómo instalarlo (WAMP)
+## Cómo instalarlo (WAMP) Para mis compañeros D:
 1. Copia la carpeta a `C:\wamp64\www\`.
 2. En phpMyAdmin, sin seleccionar ninguna base, importa `schema.sql` (crea la base `veterinaria`).
-3. Abre `http://localhost/trabajo_majo/login.php`. Usuarios de prueba: `veterinario` y `asistente`, contraseña `123456` (BCRYPT).
+3. Abre `http://localhost/veterinaria-los-angeles/login.php`. Usuarios de prueba: `veterinario` y `asistente`, contraseña `123456` (BCRYPT).
 4. La carpeta `uploads/` debe poder escribirse (fotos).
+Espero que los ayude :)
