@@ -145,9 +145,7 @@ require_once "includes/header.php";
 
         <!-- Servicios: se pueden marcar varios (por eso el name lleva [] ) -->
         <div class="form-grupo full-width" style="background:var(--morado-suave); padding:16px; border-radius:12px;">
-            <label style="color:var(--morado-principal); margin-bottom:10px; display:block;">✨ Tipo de Servicio (Marcar los que apliquen)
-
-            </label>
+            <label style="color:var(--morado-principal); margin-bottom:10px; display:block;">✨ Tipo de Servicio (Marcar los que apliquen)</label>
             <div style="display:flex; gap:20px; flex-wrap:wrap;">
                 <label><input type="checkbox" name="servicios[]" value="Baño"> Baño</label>
                 <label><input type="checkbox" name="servicios[]" value="Deslanado"> Deslanado</label>
@@ -190,8 +188,7 @@ require_once "includes/header.php";
 
         <!-- Botón para guardar todo -->
         <div class="form-grupo full-width" style="margin-top: 10px;">
-            <button type="submit" class="boton boton-rosa" style="width:100%; padding:14px; font-size:18px;"><span class="emoji">✨</span> 
-            Guardar Hoja de Recepción</button>
+            <button type="submit" class="boton boton-rosa" style="width:100%; padding:14px; font-size:18px;"><span class="emoji">✨</span> Guardar Hoja de Recepción</button>
         </div>
     </form>
 </div>
