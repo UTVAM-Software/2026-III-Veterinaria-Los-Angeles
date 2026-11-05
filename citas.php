@@ -1,6 +1,7 @@
 <?php
 require_once "includes/auth.php";
 require_once "config/conexion.php";
+exigir('citas.ver');
 
 $errores = [];
 $v = ['paciente_id' => '', 'fecha_cita' => '', 'hora_cita' => '', 'motivo' => ''];
@@ -9,7 +10,9 @@ if (isset($_GET['paciente_id']) && ctype_digit($_GET['paciente_id'])) { $v['paci
 
 // ----- Registrar una cita nueva -----
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'crear_cita') {
-    if (!csrf_ok()) {
+    if (!puede('citas.crear')) {
+        $errores[] = "No tienes permiso para agendar citas.";
+    } elseif (!csrf_ok()) {
         $errores[] = "La pantalla estuvo abierta mucho tiempo. Vuelve a intentar guardar.";
     }
     foreach ($v as $campo => $_) { $v[$campo] = trim($_POST[$campo] ?? ''); }
@@ -50,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'crear
 
 // ----- Guardar diagnóstico (solo el veterinario) -----
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'guardar_diagnostico') {
-    if ($_SESSION['rol'] !== 'veterinario') {
-        flash('error', "Solo el veterinario puede escribir el diagnóstico.");
+    if (!puede('citas.diagnostico')) {
+        flash('error', "No tienes permiso para escribir diagnósticos.");
     } elseif (!csrf_ok()) {
         flash('error', "La pantalla estuvo abierta mucho tiempo. Intenta guardar otra vez.");
     } else {
@@ -73,17 +76,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'guard
     exit();
 }
 
-// ----- Buscar citas (las pendientes salen primero) -----
+// ----- Eliminar una cita -----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'eliminar_cita') {
+    if (!puede('citas.eliminar')) {
+        flash('error', "No tienes permiso para eliminar citas.");
+    } elseif (!csrf_ok()) {
+        flash('error', "La pantalla estuvo abierta mucho tiempo. Intenta otra vez.");
+    } elseif (!ctype_digit((string)($_POST['cita_id'] ?? ''))) {
+        flash('error', "No se encontró la cita.");
+    } else {
+        $pdo->prepare("DELETE FROM citas_medicas WHERE id = ?")->execute([$_POST['cita_id']]);
+        flash('ok', "Se eliminó la cita. El paciente sigue registrado.");
+    }
+    header("Location: citas.php");
+    exit();
+}
+
+// ----- Buscar citas (las pendientes salen primero) + filtro por estado + páginas -----
 $busqueda = trim($_GET['busqueda'] ?? '');
+$estado = $_GET['estado'] ?? '';
+if (!in_array($estado, ['Pendiente', 'Atendida'], true)) { $estado = ''; }
 $sql = "SELECT c.*, p.nombre AS mascota_nombre, p.dueno_nombre, p.dueno_telefono
         FROM citas_medicas c JOIN pacientes p ON c.paciente_id = p.id ";
+$condiciones = [];
+$params = [];
 if ($busqueda !== '') {
-    $stmt = $pdo->prepare($sql . "WHERE p.nombre LIKE ? OR p.dueno_nombre LIKE ? OR c.motivo LIKE ?
-                           ORDER BY (c.estatus = 'Atendida'), c.fecha_cita ASC");
-    $stmt->execute(["%$busqueda%", "%$busqueda%", "%$busqueda%"]);
-} else {
-    $stmt = $pdo->query($sql . "ORDER BY (c.estatus = 'Atendida'), c.fecha_cita ASC");
+    $condiciones[] = "(p.nombre LIKE ? OR p.dueno_nombre LIKE ? OR c.motivo LIKE ?)";
+    array_push($params, "%$busqueda%", "%$busqueda%", "%$busqueda%");
 }
+if ($estado !== '') { $condiciones[] = "c.estatus = ?"; $params[] = $estado; }
+$where = $condiciones ? "WHERE " . implode(' AND ', $condiciones) . " " : "";
+$total = $pdo->prepare("SELECT COUNT(*) FROM citas_medicas c JOIN pacientes p ON c.paciente_id = p.id " . $where);
+$total->execute($params);
+list($pagina, $paginas, $desde, $por_pagina) = paginar((int)$total->fetchColumn(), 8);
+$stmt = $pdo->prepare($sql . $where . "ORDER BY (c.estatus = 'Atendida'), c.fecha_cita ASC LIMIT $por_pagina OFFSET $desde");
+$stmt->execute($params);
 $citas = $stmt->fetchAll();
 
 $pacientes_lista = $pdo->query("SELECT id, nombre, dueno_nombre FROM pacientes ORDER BY nombre ASC")->fetchAll();
@@ -109,6 +136,7 @@ require_once "includes/header.php";
 <?php endif; ?>
 
 <!-- Agendar cita -->
+<?php if (puede('citas.crear')): ?>
 <div class="tarjeta-formulario" id="nueva-cita" style="margin-bottom:30px;">
     <h3 style="margin-top:0;">📅 Agendar una cita nueva</h3>
     <?php if (count($pacientes_lista) === 0): ?>
@@ -150,29 +178,49 @@ require_once "includes/header.php";
     <?php endif; ?>
 </div>
 
+<?php endif; ?>
+
 <!-- Buscador de citas -->
 <form method="GET" action="citas.php" class="buscador-form" role="search">
     <input type="text" name="busqueda" value="<?= e($busqueda) ?>" class="input-control" style="flex:1;"
            placeholder="Buscar cita por mascota, dueño o motivo" aria-label="Buscar cita">
+    <select name="estado" class="input-control" style="max-width:200px;" aria-label="Filtrar por estado">
+        <option value="">Todas</option>
+        <option value="Pendiente" <?= $estado === 'Pendiente' ? 'selected' : '' ?>>⏳ Pendientes</option>
+        <option value="Atendida" <?= $estado === 'Atendida' ? 'selected' : '' ?>>✅ Atendidas</option>
+    </select>
     <button type="submit" class="boton boton-secundario"><span class="emoji">🔍</span> Buscar</button>
-    <?php if ($busqueda !== ''): ?><a href="citas.php" class="boton boton-secundario">Ver todas</a><?php endif; ?>
+    <?php if ($busqueda !== '' || $estado !== ''): ?><a href="citas.php" class="boton boton-secundario">Ver todas</a><?php endif; ?>
 </form>
 
 <h3>📋 Citas y expedientes</h3>
 <div style="display:grid; gap:20px; margin-top:15px;">
     <?php if (empty($citas)): ?>
         <p class="vacio">
-            <?= $busqueda !== '' ? 'No encontramos citas con esa búsqueda.' : 'Todavía no hay citas registradas.' ?>
+            <?= ($busqueda !== '' || $estado !== '') ? 'No encontramos citas con esa búsqueda.' : 'Todavía no hay citas registradas.' ?>
         </p>
     <?php else: foreach ($citas as $c): $atendida = ($c['estatus'] === 'Atendida'); ?>
         <div class="tarjeta-formulario" style="padding:20px;">
-            <h4 style="margin-top:0;">🐾 <a href="paciente_detalle.php?id=<?= (int)$c['paciente_id'] ?>"><?= e($c['mascota_nombre']) ?></a> · Dueño: <?= e($c['dueno_nombre']) ?> (📞 <?= e($c['dueno_telefono']) ?>)</h4>
+            <h4 style="margin-top:0;">🐾 <a href="paciente_detalle.php?id=<?= (int)$c['paciente_id'] ?>"><?= e($c['mascota_nombre']) ?></a> · Dueño: <?= e($c['dueno_nombre']) ?> (📞 <?= telefono_mx($c['dueno_telefono']) ?>)</h4>
             <p><strong>Cuándo:</strong> <?= fecha_mx($c['fecha_cita']) ?> a las <?= e($c['hora_cita']) ?></p>
             <p><strong>Motivo:</strong> <?= e($c['motivo']) ?></p>
             <p><strong>Estado:</strong> <span class="etiqueta <?= $atendida ? 'etiqueta-ok' : 'etiqueta-pendiente' ?>"><?= $atendida ? '✅ Atendida' : '⏳ Pendiente' ?></span></p>
+            <?php if (puede('citas.editar') || puede('citas.eliminar')): ?>
+            <div class="acciones" style="margin-bottom:6px;">
+                <?php if (puede('citas.editar')): ?><a href="cita_editar.php?id=<?= (int)$c['id'] ?>" class="boton boton-secundario boton-pequeno">✏️ Editar cita</a><?php endif; ?>
+                <?php if (puede('citas.eliminar')): ?>
+                <form method="POST" data-confirmar="¿Seguro que quieres eliminar esta cita? Esto no se puede deshacer." style="margin:0;">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="eliminar_cita">
+                    <input type="hidden" name="cita_id" value="<?= (int)$c['id'] ?>">
+                    <button type="submit" class="boton boton-peligro boton-pequeno">🗑️ Eliminar</button>
+                </form>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
             <hr class="separador">
             <h5 style="margin:0 0 8px;">🩺 Diagnóstico del veterinario</h5>
-            <?php if ($_SESSION['rol'] === 'veterinario'): ?>
+            <?php if (puede('citas.diagnostico')): ?>
                 <form action="citas.php" method="POST" data-evitar-doble="1">
                     <?= csrf_field() ?>
                     <input type="hidden" name="action" value="guardar_diagnostico">
@@ -183,12 +231,14 @@ require_once "includes/header.php";
                 </form>
             <?php else: ?>
                 <div class="valor-box">
-                    <?= !empty($c['diagnostico']) ? nl2br(e($c['diagnostico'])) : '<em>Todavía no hay diagnóstico. Solo el veterinario puede escribirlo.</em>' ?>
+                    <?= !empty($c['diagnostico']) ? nl2br(e($c['diagnostico'])) : '<em>Todavía no hay diagnóstico. Solo quien tenga permiso de diagnóstico puede escribirlo.</em>' ?>
                 </div>
             <?php endif; ?>
         </div>
     <?php endforeach; endif; ?>
 </div>
+
+<?php mostrar_paginacion($pagina, $paginas); ?>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 

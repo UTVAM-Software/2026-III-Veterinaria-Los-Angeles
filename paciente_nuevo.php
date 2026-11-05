@@ -7,6 +7,7 @@ $sexos_validos = ['Macho', 'Hembra'];
 // Si viene un id, estamos EDITANDO a un paciente que ya existe
 $id = $_GET['id'] ?? ($_POST['id'] ?? '');
 $editando = ctype_digit((string)$id);
+exigir($editando ? 'pacientes.editar' : 'pacientes.crear');
 $actual = null;
 if ($editando) {
     $s = $pdo->prepare("SELECT * FROM pacientes WHERE id = ?");

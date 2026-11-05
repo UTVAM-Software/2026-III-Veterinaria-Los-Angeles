@@ -78,4 +78,11 @@ document.addEventListener('DOMContentLoaded', function () {
         anticipo.addEventListener('input', calcular);
         calcular();
     }
+
+    // 9) Tabla de permisos: "marcar todo" de un rol
+    document.querySelectorAll('.marcar-columna').forEach(function (maestro) {
+        maestro.addEventListener('change', function () {
+            document.querySelectorAll('input[name^="perm["][data-rol="' + maestro.dataset.rol + '"]').forEach(function (c) { c.checked = maestro.checked; });
+        });
+    });
 });

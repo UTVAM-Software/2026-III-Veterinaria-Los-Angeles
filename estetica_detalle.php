@@ -1,6 +1,7 @@
 <?php
 require_once "includes/auth.php";
 require_once "config/conexion.php";
+exigir('estetica.ver');
 
 $id = $_GET['id'] ?? ($_POST['id'] ?? '');
 if (!ctype_digit((string)$id)) {
@@ -10,6 +11,11 @@ if (!ctype_digit((string)$id)) {
 
 // Eliminar SOLO esta hoja (el paciente y sus citas médicas no se tocan)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'eliminar') {
+    if (!puede('estetica.eliminar')) {
+        flash('error', "No tienes permiso para eliminar hojas de estética.");
+        header("Location: estetica_detalle.php?id=" . (int)$id);
+        exit();
+    }
     if (!csrf_ok()) {
         flash('error', "La pantalla estuvo abierta mucho tiempo. Intenta otra vez.");
         header("Location: estetica_detalle.php?id=" . (int)$id);
@@ -33,7 +39,7 @@ if (!$h) {
 
 $total = (float)($h['costo_total'] ?? 0);
 $cuenta = (float)($h['a_cuenta'] ?? 0);
-$resta = max(0, $total - $cuenta);
+$resta = saldo_pendiente($total, $cuenta);
 
 require_once "includes/header.php";
 ?>
@@ -45,12 +51,15 @@ require_once "includes/header.php";
     </div>
     <div class="acciones">
         <a href="estetica.php" class="boton boton-secundario"><span class="emoji">⬅️</span> Volver a la lista</a>
+        <?php if (puede('estetica.editar')): ?><a href="estetica_nueva.php?id=<?= (int)$h['id'] ?>" class="boton boton-secundario"><span class="emoji">✏️</span> Editar hoja</a><?php endif; ?>
+        <?php if (puede('estetica.eliminar')): ?>
         <form method="POST" data-confirmar="¿Seguro que quieres eliminar esta hoja de estética? Esto no se puede deshacer. El paciente y sus citas médicas no se borran." style="margin:0;">
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="eliminar">
             <input type="hidden" name="id" value="<?= (int)$h['id'] ?>">
             <button type="submit" class="boton boton-peligro"><span class="emoji">🗑️</span> Eliminar hoja</button>
         </form>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -78,7 +87,7 @@ require_once "includes/header.php";
         </div>
         <div class="detalle-item">
             <span class="label">👤 Dueño y contacto</span>
-            <span class="valor chico"><?= e($h['dueno_nombre']) ?> (📞 <?= e($h['dueno_telefono']) ?>)</span>
+            <span class="valor chico"><?= e($h['dueno_nombre']) ?> (📞 <?= telefono_mx($h['dueno_telefono']) ?>)</span>
         </div>
         <div class="detalle-item">
             <span class="label">🏠 Domicilio</span>
@@ -98,7 +107,7 @@ require_once "includes/header.php";
         </div>
         <div class="detalle-item full-width">
             <span class="label">💲 Cobro</span>
-            <span class="valor">Total: $<?= number_format($total, 2) ?> · Anticipo: $<?= number_format($cuenta, 2) ?> · Falta por pagar: $<?= number_format($resta, 2) ?></span>
+            <span class="valor">Total: <?= dinero($total) ?> · Anticipo: <?= dinero($cuenta) ?> · Falta por pagar: <?= dinero($resta) ?></span>
         </div>
         <div class="detalle-item">
             <span class="label">💳 Forma de pago</span>
