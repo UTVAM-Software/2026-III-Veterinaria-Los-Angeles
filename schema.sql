@@ -1,4 +1,5 @@
 -- Crear la base de datos si no existe (solo se usa esta base, no toca otras)
+DROP DATABASE IF EXISTS veterinaria;
 CREATE DATABASE IF NOT EXISTS veterinaria CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE veterinaria;
 
