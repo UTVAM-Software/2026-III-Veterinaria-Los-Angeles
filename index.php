@@ -1,6 +1,4 @@
 <?php
-// Esta es la página principal del sistema.
-// Solo manda al usuario directo a la lista de mascotas.
-header("Location: mascotas.php");
-exit(); // detenemos el código aquí para que no siga ejecutando nada más
-?>
+// Página principal: manda a la lista de pacientes (si no hay sesión, ahí mismo lo manda al login)
+header("Location: pacientes.php");
+exit();

@@ -1,43 +1,42 @@
 <?php
-// Iniciamos la sesión, pero solo si todavía no estaba iniciada
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Pide haber iniciado sesión (también arranca la sesión)
+require_once __DIR__ . '/auth.php';
+// Para saber en qué página estamos y marcar el botón del menú
+$pagina_actual = basename($_SERVER['PHP_SELF']);
+$en_pacientes = in_array($pagina_actual, ['pacientes.php', 'paciente_nuevo.php', 'paciente_detalle.php']);
+$en_estetica = in_array($pagina_actual, ['estetica.php', 'estetica_nueva.php', 'estetica_detalle.php']);
+$en_citas = ($pagina_actual === 'citas.php');
+$rol_texto = ($_SESSION['rol'] === 'veterinario') ? 'Veterinario' : 'Asistente';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Para que la página se vea bien en el celular también -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Título que sale en la pestaña del navegador -->
     <title>Estética Canina - Los Ángeles</title>
-    <!-- Fuente redondeada y bonita estilo app -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Conectamos el archivo de estilos -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app">
-  <!-- Barra morada de arriba con el logo y el menú -->
   <header class="encabezado-superior">
     <div class="marca">
       <div class="marca-icono">
-        <!-- Aquí carga tu logo.png (si no lo encuentra, muestra una patita dibujada) -->
-        <img src="logo.png" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' 
-        width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23652780\' stroke-width=\'2\'><path 
-        d=\'M10 5.172C10 3.782 8.423 2.679 6.5 3c-2 .333-3.5 2.1-3.5 4 0 3 4 6 9 11 5-5 9-8 9-11 0-1.9-1.5-3.667-3.5-4-1.923-.321-3.5.782-3.5 2.172z
-        \'/></svg>'">
+        <img src="LOGO.png" alt="Logo de la veterinaria">
       </div>
-      <!-- Nombre de la veterinaria -->
       <div class="marca-texto">Veterinaria<br>Los Ángeles</div>
     </div>
-    <!-- Menú (por ahora solo tiene Estética Canina) -->
-    <nav class="menu-superior">
-      <div class="nav-item-top">
-        <span>🐶 Estética Canina</span>
-      </div>
+    <!-- Menú: tres botones grandes y claros -->
+    <nav class="menu-superior" aria-label="Menú principal">
+      <a href="pacientes.php" class="nav-item-top <?= $en_pacientes ? 'activo' : '' ?>">🐕 Pacientes</a>
+      <a href="estetica.php" class="nav-item-top <?= $en_estetica ? 'activo' : '' ?>">✂️ Estética Canina</a>
+      <a href="citas.php" class="nav-item-top <?= $en_citas ? 'activo' : '' ?>">🩺 Citas Médicas</a>
     </nav>
+    <!-- Quién está usando el sistema y botón para salir -->
+    <div class="usuario-caja">
+      <span>👤 <?= e($_SESSION['usuario_nombre']) ?><br><small><?= e($rol_texto) ?></small></span>
+      <a href="logout.php" class="nav-item-top salir">Cerrar sesión</a>
+    </div>
   </header>
-  <!-- Aquí empieza el contenido de cada página (se cierra en footer.php) -->
   <main class="contenido">
+<?php mostrar_flash(); ?>

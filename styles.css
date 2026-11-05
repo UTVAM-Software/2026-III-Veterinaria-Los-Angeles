@@ -59,6 +59,7 @@ a { color: inherit; text-decoration: none; }
 /* Menú de arriba */
 .menu-superior { display: flex; gap: 10px; }
 .nav-item-top {
+  cursor: pointer;
   display: flex; align-items: center; gap: 8px; padding: 8px 18px;
   border-radius: 14px; background: var(--rosita-pastel); color: var(--morado-oscuro); font-weight: 700;
 }
@@ -134,4 +135,89 @@ table.tabla { width: 100%; border-collapse: collapse; }
 .valor-box {
   background: var(--fondo-general); padding: 18px; border-radius: 14px;
   border: 2px solid var(--borde-suave); margin-top: 8px; font-size: 16px;
+}
+
+/* =====================================================================
+   MEJORAS PARA FACILITAR EL USO (letras más grandes, avisos claros, etc.)
+   ===================================================================== */
+body { font-size: 18px; line-height: 1.45; }
+.suave { color: var(--texto-suave); }
+.normal { font-weight: normal; }
+.vacio { text-align: center; padding: 30px; color: var(--texto-suave); }
+
+/* Campos y botones más grandes y fáciles de tocar */
+.input-control { font-size: 18px; min-height: 52px; }
+textarea.input-control { min-height: 90px; }
+.input-control:focus { box-shadow: 0 0 0 4px rgba(101, 39, 128, 0.15); }
+.input-control[readonly] { background: var(--morado-suave); color: var(--texto-suave); }
+.input-control:invalid:not(:placeholder-shown):not(:focus) { border-color: #e04b4b; }
+.boton { font-size: 18px; min-height: 48px; }
+.boton:focus-visible, .input-control:focus-visible, a:focus-visible { outline: 3px solid var(--morado-principal); outline-offset: 2px; }
+.boton-grande { width: 100%; padding: 16px; font-size: 20px; }
+.boton-grande-auto { padding: 16px 28px; font-size: 19px; }
+.boton-peligro { background: #d64545; color: #fff; }
+.boton-peligro:hover { background: #b83232; }
+.boton[disabled] { opacity: .6; cursor: wait; }
+
+/* Menú de arriba */
+.encabezado-superior { flex-wrap: wrap; gap: 14px; }
+.nav-item-top {
+  cursor: pointer; text-decoration: none; transition: transform .1s; }
+.nav-item-top:hover { transform: translateY(-1px); }
+.nav-item-top.activo { background: var(--rosita-principal); color: #fff; }
+.nav-item-top.salir { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.6); font-weight: 600; }
+.usuario-caja { display: flex; align-items: center; gap: 14px; text-align: right; font-size: 15px; line-height: 1.2; }
+.usuario-caja small { opacity: .85; }
+
+/* Avisos: verde = todo bien, rojo = hay que corregir algo */
+.alerta { padding: 16px 20px; border-radius: 14px; margin-bottom: 22px; font-weight: 600; border: 2px solid; }
+.alerta ul { margin: 8px 0 0; padding-left: 22px; font-weight: 500; }
+.alerta li { margin-bottom: 4px; }
+.alerta-ok { background: #e6f6ec; color: #17623a; border-color: #9fd9b6; }
+.alerta-error { background: #fdecec; color: #8f1d1d; border-color: #f2a8a8; }
+
+/* Formulario por secciones */
+.form-secciones { display: grid; gap: 24px; }
+.seccion { border: 2px solid var(--borde-suave); border-radius: 16px; padding: 20px 22px 24px; margin: 0; }
+.seccion legend { font-weight: 700; font-size: 20px; color: var(--morado-principal); padding: 0 10px; }
+.ayuda { display: block; color: var(--texto-suave); font-size: 14px; margin-top: 6px; }
+p.ayuda { font-size: 16px; margin: 0 0 12px; }
+.input-archivo { padding: 10px; }
+
+/* Servicios como botones grandes para marcar */
+.servicios-lista { display: flex; flex-wrap: wrap; gap: 12px; }
+.servicio-opcion {
+  display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; cursor: pointer;
+  background: var(--morado-suave); border: 2px solid var(--borde-suave); border-radius: 14px; font-weight: 600;
+}
+.servicio-opcion input { width: 22px; height: 22px; accent-color: var(--morado-principal); }
+.servicio-opcion:has(input:checked) { background: var(--turquesa-suave); border-color: var(--turquesa-principal); }
+
+/* Etiquetas de estado de las citas */
+.etiqueta { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+.etiqueta-ok { background: #e6f6ec; color: #17623a; }
+.etiqueta-pendiente { background: #fff1de; color: #a35a00; }
+.separador { margin: 15px 0; border: 0; border-top: 1px solid var(--borde-suave); }
+
+/* Ficha de la mascota */
+.acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+.foto-caja { flex: 1; min-width: 250px; text-align: center; background: var(--morado-suave); padding: 20px; border-radius: 16px; }
+.foto-mascota { width: 100%; max-height: 280px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+.valor.chico { font-size: 17px; }
+
+/* Pantalla de entrada */
+.pagina-login { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--fondo-general); padding: 20px; }
+.login-caja { max-width: 440px; width: 100%; text-align: center; }
+.campo-login { text-align: left; margin-bottom: 18px; }
+.mostrar-clave { display: flex !important; align-items: center; gap: 8px; margin-top: 10px; font-weight: 500 !important; font-size: 16px; }
+
+/* Celular y tablet */
+@media (max-width: 760px) {
+  .contenido { padding: 20px 16px 50px; }
+  .encabezado-pagina { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .grid-form, .detalle-grid { grid-template-columns: 1fr; }
+  .full-width { grid-column: span 1; }
+  .tabla-envoltura { overflow-x: auto; }
+  .buscador-form { flex-wrap: wrap; }
+  .usuario-caja { text-align: left; }
 }

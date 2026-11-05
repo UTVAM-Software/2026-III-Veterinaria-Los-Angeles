@@ -1,17 +1,16 @@
 <?php
-// Datos para conectarnos a la base de datos
-$host = "localhost";    // el servidor (nuestra propia computadora)
-$db   = "veterinaria";  // nombre de la base de datos
-$user = "root";         // usuario de MySQL
-$pass = "";             // contraseña (vacía porque es la de por defecto)
+// Datos de conexión protegidos mediante constantes de configuración
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'veterinaria');
+define('DB_USER', 'root');
+define('DB_PASS', ''); // En entorno local se mantiene vacío por defecto
 
 try {
-    // Creamos el puente de conexión
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-    // Con esto, si hay un error en una consulta nos manda el mensaje del error
+    // Creamos la conexión PDO utilizando las constantes definidas
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    // Si no se pudo conectar, detenemos todo y mostramos el error
-    die("Error de conexión: " . $e->getMessage());
+    // Control de errores seguro
+    die("Error de conexión al servidor de base de datos.");
 }
 ?>

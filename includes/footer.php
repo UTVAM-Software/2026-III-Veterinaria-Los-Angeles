@@ -1,5 +1,5 @@
-<!-- Cerramos las etiquetas que se abrieron en header.php -->
-</main>
+  </main>
 </div>
+<script src="app.js"></script>
 </body>
 </html>
