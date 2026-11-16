@@ -33,7 +33,7 @@ que existan estos programas y, si falta alguno, indica cómo instalarlo:
 
 ```bash
 sudo apt update
-sudo apt install -y git php php-mysql mariadb-server
+sudo apt install -y git php php-mysql php-mbstring mariadb-server
 ```
 
 ### Pasos
