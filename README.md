@@ -1,30 +1,130 @@
-# 🐾 Estética Canina Los Ángeles
+# Sistema de Gestión Veterinaria - Los Ángeles
 
-Sistema web modular para la gestión de pacientes, estética canina y citas médicas.
+Aplicación web multi-rol para la administración de una clínica veterinaria: pacientes (mascotas y
+dueños), hojas de estética canina, citas médicas con diagnóstico, y administración de usuarios,
+roles y permisos.
 
-## Cómo está organizado (Entregable 3)
-* **Administración:** Usuarios (crear, listar, editar, activar/desactivar, eliminar), Roles y Permisos (tabla con palomitas para dar o quitar permisos a cada rol, y crear permisos nuevos), todo desde la app.
-* **CRUD completo** en pacientes, hojas de estética, citas médicas y usuarios. Listas con búsqueda y paginación.
-* Cada pantalla y cada botón revisan el permiso del usuario (`puede('clave')` / `exigir('clave')` en `includes/auth.php`). El rol **Administrador** está protegido: siempre tiene todo y no se puede borrar.
+## Equipo de desarrollo
 
-## Cómo está organizado
-* **Pacientes:** cada mascota (y su dueño) se registra una sola vez.
-* **Estética Canina:** cada visita es una hoja que apunta a un paciente.
-* **Citas Médicas:** cada cita apunta a un paciente (no necesita pasar por estética).
-Los módulos son independientes entre sí; solo comparten al paciente.
+| Integrante | Responsabilidad |
+|---|---|
+| Ana Karen Beltrán Montañez | Arquitectura, seguridad del repositorio, backend y frontend |
+| Cesar Daniel Martinez Bertadillo | Base de datos y documentación |
+| Abril Acosta Zamora| Desarrollo de módulos |
+| Alondra Quezada Mejia | Control de calidad (QA) y pruebas de instalación limpia |
+
+Organización: **UTVAM-Software**
+
+Repositorio: https://github.com/UTVAM-Software/2026-III-Veterinaria-Los-Angeles
 
 ## Tecnologías
-* **Backend:** PHP (PDO). **Base de datos:** MySQL. **Frontend:** HTML5, CSS3 y JavaScript.
 
-## Cómo instalarlo (WAMP)
-1. Copia la carpeta a `C:\wamp64\www\`.
-2. En phpMyAdmin, sin seleccionar ninguna base, importa `schema.sql` (crea la base `veterinaria` desde cero; **borra los datos anteriores**).
-   * Si ya tienes datos y no quieres perderlos: selecciona la base `veterinaria` e importa **solo una vez** `migracion_entregable3.sql`.
-3. Abre `http://localhost/trabajo_majo/login.php`. Usuarios de prueba: `admin`, `veterinario` y `asistente`, contraseña `123456` (BCRYPT).
-4. La carpeta `uploads/` debe poder escribirse (fotos).
+- **Frontend:** HTML5, CSS3, Bootstrap 5.3, JavaScript
+- **Backend:** PHP 8.x con consultas preparadas (PDO)
+- **Base de datos:** MySQL / MariaDB
+- **Control de versiones:** Git y GitHub (rama `main`)
 
-## Archivos nuevos del Entregable 3
-`usuarios.php`, `usuario_form.php`, `roles.php`, `rol_form.php`, `permisos.php`, `cita_editar.php`, `sin_permiso.php`, `migracion_entregable3.sql`.
+## Instalación en Linux (instalador automático)
 
-## Archivos modificados
-`schema.sql`, `includes/auth.php`, `includes/validar.php`, `includes/header.php`, `login.php`, `index.php`, `pacientes.php`, `paciente_detalle.php`, `paciente_nuevo.php`, `estetica.php`, `estetica_detalle.php`, `estetica_nueva.php` (ahora también edita), `citas.php`, `app.js`, `styles.css`.
+### Requisitos
+
+Un sistema Linux con Ubuntu/Debian (o similar), acceso a `sudo` e internet. El instalador revisa
+que existan estos programas y, si falta alguno, indica cómo instalarlo:
+
+```bash
+sudo apt update
+sudo apt install -y git php php-mysql mariadb-server
+```
+
+### Pasos
+
+```bash
+git clone https://github.com/UTVAM-Software/2026-III-Veterinaria-Los-Angeles.git
+cd 2026-III-Veterinaria-Los-Angeles
+bash instalar.sh
+```
+
+Al terminar, el sistema queda funcionando en:
+
+**http://localhost:8000/index.php?p=login**
+
+Para detener el servidor, presionar `Ctrl + C` en la terminal.
+
+### Qué hace el instalador
+
+1. **Crear el ambiente virtual:** NO APLICA. El proyecto es PHP y no usa ambientes virtuales.
+2. **Descargar el código fuente:** revisa que existan `git`, `php` y `mysql`. Si se ejecuta fuera
+   del repositorio, lo descarga con `git clone`.
+3. **Configurar base de datos y usuarios:** crea la base `veterinaria` y un usuario de MySQL
+   propio, importa `base_datos/veterinaria.sql` y genera `config/conexion.php` a partir de la
+   plantilla.
+4. **Herramientas propias de la aplicación:** NO APLICA (solo para proyectos Django).
+5. **Activar el servicio web:** inicia el servidor con `php -S 0.0.0.0:8000`.
+
+Si cualquier paso falla, el instalador se detiene y muestra el motivo.
+
+> Importante: reinstalar borra los datos. Cada vez que se ejecuta `instalar.sh` se elimina y se
+> vuelve a crear la base `veterinaria`.
+
+### Credenciales
+
+**Usuarios del sistema (contraseña de todos: `123456`):**
+
+| Usuario | Rol | Acceso |
+|---|---|---|
+| `admin` | Administrador | Control total del sistema |
+| `veterinario` | Veterinario | Pacientes, estética, citas y diagnósticos |
+| `asistente` | Asistente | Pacientes, estética y citas (sin eliminar ni diagnosticar) |
+
+**Base de datos creada por el instalador (solo para uso local):**
+
+| Dato | Valor |
+|---|---|
+| Base de datos | `veterinaria` |
+| Usuario MySQL | `vet_user` |
+| Contraseña MySQL | `vet_pass_2026` |
+
+## Instalación manual en Windows (WAMP)
+
+1. Copiar la carpeta del proyecto a `C:\wamp64\www\`.
+2. Copiar `config/conexion.example.php` como `config/conexion.php` y poner los datos de tu MySQL
+   local (en WAMP normalmente usuario `root` y contraseña vacía; la base debe llamarse
+   `veterinaria`).
+3. En phpMyAdmin, ir a **Importar** y subir `base_datos/veterinaria.sql` (crea la base y las
+   tablas desde cero).
+4. Abrir `http://localhost/2026-III-Veterinaria-Los-Angeles/index.php?p=login`.
+
+## Seguridad
+
+- El archivo real de conexión `config/conexion.php` **nunca se sube a GitHub**: está en
+  `.gitignore`.
+- En el repositorio solo existe la plantilla `config/conexion.example.php`, con valores genéricos.
+- Las contraseñas de los usuarios se guardan encriptadas (BCRYPT).
+- Todas las consultas a la base de datos usan sentencias preparadas (PDO).
+- Cada pantalla y botón verifican el permiso del usuario según su rol.
+
+## Estructura del proyecto
+
+```
+index.php                  Aplicación y enrutador (index.php?p=<pantalla>)
+app.js / styles.css        Comportamiento y estilos
+config/
+  conexion.example.php     Plantilla de conexión (la real no se sube)
+base_datos/
+  veterinaria.sql          Estructura y datos iniciales de la base
+uploads/                   Fotos de las mascotas
+documentacion/             Modelos conceptual y lógico de la base de datos
+instalar.sh                Instalador automático para Linux
+README.md                  Este archivo
+```
+
+## Solución de problemas
+
+- **Falta 'php' (o 'git', 'mysql'):** instalar los requisitos con el comando `apt install` de la
+  sección de requisitos.
+- **Falta php-mysql:** ejecutar `sudo apt install php-mysql`.
+- **Address already in use:** el puerto 8000 está ocupado. Cerrar el otro servidor o cambiar
+  `PORT` en `instalar.sh`.
+- **Error de conexión al servidor de base de datos:** verificar que MariaDB esté activo con
+  `sudo service mariadb start`.
+- **No se pueden subir fotos:** dar permisos a la carpeta con `chmod -R 775 uploads`.
