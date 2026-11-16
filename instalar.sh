@@ -30,8 +30,7 @@ CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';
 GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';
 FLUSH PRIVILEGES;
 SQL
-mysql -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" < base_datos/01_estructura.sql
-mysql -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" < base_datos/02_datos_iniciales.sql
+mysql --default-character-set=utf8mb4 -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" < base_datos/veterinaria.sql
 
 cp config/conexion.example.php config/conexion.php
 sed -i "s/TU_USUARIO/${DB_USER}/; s/TU_PASSWORD/${DB_PASS}/" config/conexion.php
