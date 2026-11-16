@@ -1,0 +1,3 @@
+# Ignorar archivo de conexión con credenciales reales
+config/conexion.php
+!config/conexion.example.php
