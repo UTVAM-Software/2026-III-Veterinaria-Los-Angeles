@@ -5,3 +5,8 @@ config/conexion.php
 # Basura de Windows
 desktop.ini
 Thumbs.db
+
+# Fotos subidas por los usuarios
+uploads/*
+!uploads/.htaccess
+!uploads/index.php
