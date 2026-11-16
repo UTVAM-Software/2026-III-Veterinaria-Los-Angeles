@@ -1,3 +1,7 @@
 # Ignorar archivo de conexión con credenciales reales
 config/conexion.php
 !config/conexion.example.php
+
+# Basura de Windows
+desktop.ini
+Thumbs.db

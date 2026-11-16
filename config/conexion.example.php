@@ -4,8 +4,8 @@
 
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'veterinaria');
-define('DB_USER', 'tu_usuario_mysql');
-define('DB_PASS', 'tu_contraseña_mysql');
+define('DB_USER', 'TU_USUARIO');
+define('DB_PASS', 'TU_PASSWORD');
 
 try {
     $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
